@@ -1,3 +1,11 @@
+---
+title: Customer Churn Predictor
+emoji: 📈
+colorFrom: blue
+colorTo: green
+sdk: python
+app_file: app.py
+---
 # Customer Churn Prediction Web App
 
 This is a full-stack data science project that predicts customer churn based on their account information. The project is built with a Scikit-learn model and deployed as a web application using Flask.

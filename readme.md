@@ -19,8 +19,8 @@ This is a full-stack data science project that predicts customer churn based on 
 
 1.  **Clone the repository:**
     ```bash
-    git clone [Your-GitHub-Repo-URL]
-    cd [Your-Repo-Name]
+    git clone https://github.com/Ahnaf-Shahadat-Taseen/customer-churn-predictor.git
+    cd customer-churn-predictor
     ```
 
 2.  **Create and activate a virtual environment:**

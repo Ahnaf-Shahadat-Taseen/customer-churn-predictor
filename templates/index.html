@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customer Churn Predictor</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Telco Customer Churn Predictor</h1>
+        <p>Fill in the customer details below to predict their churn risk.</p>
+        
+        <form id="churn-form">
+            <!-- Numerical Inputs -->
+            <div class="form-group">
+                <label for="tenure">Tenure (months)</label>
+                <input type="number" id="tenure" name="tenure" required step="1" min="0" value="12">
+            </div>
+            <div class="form-group">
+                <label for="MonthlyCharges">Monthly Charges ($)</label>
+                <input type="number" id="MonthlyCharges" name="MonthlyCharges" required step="0.01" min="0" value="70.00">
+            </div>
+            <div class="form-group">
+                <label for="TotalCharges">Total Charges ($)</label>
+                <input type="number" id="TotalCharges" name="TotalCharges" required step="0.01" min="0" value="1000.00">
+            </div>
+
+            <!-- Categorical Inputs -->
+            <div class="form-group">
+                <label for="gender">Gender</label>
+                <select id="gender" name="gender">
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
+                </select>
+            </div>
+            
+            <!-- THIS IS THE NEWLY ADDED FIELD -->
+            <div class="form-group">
+                <label for="SeniorCitizen">Senior Citizen</label>
+                <select id="SeniorCitizen" name="SeniorCitizen">
+                    <option value="0">No</option>
+                    <option value="1">Yes</option>
+                </select>
+            </div>
+            <!-- END OF NEWLY ADDED FIELD -->
+            
+            <div class="form-group">
+                <label for="Contract">Contract Type</label>
+                <select id="Contract" name="Contract">
+                    <option value="Month-to-month">Month-to-month</option>
+                    <option value="One year">One year</option>
+                    <option value="Two year">Two year</option>
+                </select>
+            </div>
+             <div class="form-group">
+                <label for="InternetService">Internet Service</label>
+                <select id="InternetService" name="InternetService">
+                    <option value="DSL">DSL</option>
+                    <option value="Fiber optic">Fiber optic</option>
+                    <option value="No">No Internet Service</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="PaymentMethod">Payment Method</label>
+                <select id="PaymentMethod" name="PaymentMethod">
+                    <option value="Electronic check">Electronic check</option>
+                    <option value="Mailed check">Mailed check</option>
+                    <option value="Bank transfer (automatic)">Bank transfer (automatic)</option>
+                    <option value="Credit card (automatic)">Credit card (automatic)</option>
+                </select>
+            </div>
+            
+            <button type="submit">Predict Churn</button>
+        </form>
+        
+        <div id="result-container" class="hidden">
+            <h2>Prediction Result</h2>
+            <p>Churn Prediction: <span id="prediction-text" class="prediction-value"></span></p>
+            <p>Churn Probability: <span id="probability-text" class="prediction-value"></span></p>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('churn-form').addEventListener('submit', async function(e) {
+            e.preventDefault(); // Prevent the default form submission
+
+            const form = e.target;
+            const formData = new FormData(form);
+            const data = Object.fromEntries(formData.entries());
+            
+            // Convert numerical inputs from string to number
+            // This is the section with the new, modified line
+            data.tenure = parseFloat(data.tenure);
+            data.MonthlyCharges = parseFloat(data.MonthlyCharges);
+            data.TotalCharges = parseFloat(data.TotalCharges);
+            data.SeniorCitizen = parseInt(data.SeniorCitizen, 10); // <-- THIS LINE WAS ADDED
+
+            // Show a loading state (optional but good UX)
+            const resultContainer = document.getElementById('result-container');
+            const predictionText = document.getElementById('prediction-text');
+            const probabilityText = document.getElementById('probability-text');
+            predictionText.textContent = 'Calculating...';
+            probabilityText.textContent = '';
+            resultContainer.classList.remove('hidden');
+
+            try {
+                const response = await fetch('/predict', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.error || 'Prediction failed.');
+                }
+
+                const result = await response.json();
+                
+                // Display the results
+                predictionText.textContent = result.churn_prediction;
+                probabilityText.textContent = (result.churn_probability * 100).toFixed(2) + '%';
+                
+                // Style the result based on prediction
+                if (result.churn_prediction === "Yes") {
+                    predictionText.style.color = '#e74c3c'; // Red for "Yes"
+                } else {
+                    predictionText.style.color = '#2ecc71'; // Green for "No"
+                }
+
+            } catch (error) {
+                predictionText.textContent = `Error: ${error.message}`;
+                predictionText.style.color = '#e74c3c'; // Red for error
+                probabilityText.textContent = 'Please check your input and try again.';
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,17 @@
+# .gitignore
+
+# Virtual Environment
+venv/
+/venv/
+.venv
+
+# Python cache files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# IDE and OS files
+.vscode/
+.idea/
+.DS_Store
